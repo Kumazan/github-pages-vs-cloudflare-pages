@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GitHub Pages vs Cloudflare Pages, 給新手的 CI/CD 入門</title>
+<meta name="description" content="給第一次做公開網站、正在學 Vibe Coding 的新手。用簡單中文理解 GitHub Pages、Cloudflare Pages 與 CI/CD 的差別。">
+<meta property="og:title" content="GitHub Pages vs Cloudflare Pages">
+<meta property="og:description" content="用簡單中文理解兩者差別，順便搞懂 CI/CD 為什麼重要。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kumazan.github.io/github-pages-vs-cloudflare-pages/">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf8f5;
+  --fg: #1f1c19;
+  --muted: #67615b;
+  --faint: #d2cbc4;
+  --card: #ffffff;
+  --accent: #c9552a;
+  --accent-strong: #f38020;
+  --accent-soft: #f7e5dc;
+  --blue-soft: #e6eefc;
+  --blue: #2754c7;
+  --green-soft: #e7f6ec;
+  --green: #1b7f45;
+  --shadow: 0 14px 40px rgba(31, 28, 25, 0.08);
+  --serif: 'Noto Serif TC', serif;
+  --sans: 'Noto Sans TC', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.85;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+a { color: var(--accent); }
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  background: rgba(250, 248, 245, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--faint);
+}
+.nav-title {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+.nav-menu-btn {
+  border: none;
+  background: none;
+  color: var(--fg);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 4px;
+}
+.nav-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  transition: width 0.25s ease;
+}
+
+.toc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.toc-overlay.open { opacity: 1; pointer-events: all; }
+.toc-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(340px, 88vw);
+  height: 100%;
+  background: var(--bg);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  padding: 1.4rem;
+  overflow-y: auto;
+}
+.toc-overlay.open .toc-drawer { transform: translateX(0); }
+.toc-header {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 1.12rem;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+.toc-list { list-style: none; }
+.toc-list li + li { margin-top: 0.65rem; }
+.toc-list a {
+  text-decoration: none;
+  color: var(--muted);
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  font-weight: 500;
+}
+.toc-list a:hover, .toc-list a.active { color: var(--accent); }
+.toc-num {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: #9a9187;
+  min-width: 1.9rem;
+}
+
+.hero {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 3.6rem 1.5rem 2.2rem;
+  text-align: center;
+  animation: fadeUp 0.8s ease both;
+}
+.hero-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 0.34rem 0.8rem;
+  margin-bottom: 1.1rem;
+}
+.hero h1 {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: clamp(2.15rem, 7.8vw, 3.6rem);
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.9rem;
+}
+.hero h1 span { color: var(--accent-strong); }
+.hero-sub {
+  max-width: 720px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 1rem;
+}
+.hero-quick {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.quick-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 1.15rem 1.2rem;
+  text-align: left;
+  border: 1px solid var(--faint);
+  box-shadow: var(--shadow);
+}
+.quick-card h3 {
+  font-family: var(--serif);
+  font-size: 1.08rem;
+  margin-bottom: 0.45rem;
+}
+.quick-card p {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.sep {
+  text-align: center;
+  color: #c7beb5;
+  letter-spacing: 0.4em;
+  font-size: 1.4rem;
+  padding: 0.8rem 0;
+}
+
+.chapter {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.6rem 1.5rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.chapter.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.chapter-num {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.chapter-num::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent-strong);
+}
+.chapter h2 {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  line-height: 1.28;
+  letter-spacing: -0.03em;
+  margin-bottom: 1rem;
+}
+.chapter h3 {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  margin-top: 1.8rem;
+  margin-bottom: 0.7rem;
+}
+.chapter p {
+  margin-bottom: 1rem;
+  color: var(--fg);
+  font-weight: 300;
+}
+.chapter strong { font-weight: 700; }
+.chapter ul, .chapter ol {
+  padding-left: 1.2rem;
+  margin-bottom: 1rem;
+}
+.chapter li {
+  margin-bottom: 0.45rem;
+  font-weight: 300;
+}
+
+.callout {
+  background: var(--accent-soft);
+  border-left: 4px solid var(--accent-strong);
+  border-radius: 0 14px 14px 0;
+  padding: 1rem 1.1rem;
+  margin: 1.2rem 0;
+}
+.callout p { margin-bottom: 0; }
+.callout-blue {
+  background: var(--blue-soft);
+  border-left-color: var(--blue);
+}
+.callout-green {
+  background: var(--green-soft);
+  border-left-color: var(--green);
+}
+
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  justify-content: center;
+  margin: 1.4rem 0;
+}
+.flow-step {
+  background: var(--card);
+  border: 1px solid var(--faint);
+  border-radius: 14px;
+  padding: 0.7rem 1rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 110px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.flow-arrow {
+  color: #b0a79e;
+  font-size: 1.2rem;
+}
+
+.compare-grid, .feature-grid, .decision-grid, .step-grid {
+  display: grid;
+  gap: 0.9rem;
+  margin: 1.15rem 0;
+}
+.compare-card, .feature-card, .decision-card, .step-card {
+  background: var(--card);
+  border: 1px solid var(--faint);
+  border-radius: 18px;
+  padding: 1rem 1.1rem;
+  box-shadow: var(--shadow);
+}
+.compare-card h4, .feature-card h4, .decision-card h4, .step-card h4 {
+  font-family: var(--serif);
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+}
+.compare-card p, .feature-card p, .decision-card p, .step-card p {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.compare-card ul, .decision-card ul {
+  margin-top: 0.55rem;
+  margin-bottom: 0;
+}
+.tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.18rem 0.5rem;
+  margin-bottom: 0.45rem;
+}
+.tag-orange { background: var(--accent-soft); color: var(--accent); }
+.tag-blue { background: var(--blue-soft); color: var(--blue); }
+.tag-green { background: var(--green-soft); color: var(--green); }
+
+.mini-label {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+
+.note-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 1rem 0;
+}
+.note-list li {
+  background: var(--card);
+  border: 1px solid var(--faint);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  box-shadow: var(--shadow);
+}
+.note-list li + li { margin-top: 0.7rem; }
+
+.footer {
+  padding: 3rem 1.5rem 3.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+.footer strong {
+  color: var(--fg);
+}
+
+@media (min-width: 700px) {
+  .hero-quick,
+  .compare-grid,
+  .feature-grid,
+  .decision-grid,
+  .step-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .hero-quick,
+  .feature-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-title">Pages × CI/CD</span>
+  <button class="nav-menu-btn" onclick="toggleTOC()" aria-label="開啟目錄">☰</button>
+  <div class="nav-progress" id="progress"></div>
+</nav>
+
+<div class="toc-overlay" id="tocOverlay" onclick="toggleTOC()">
+  <div class="toc-drawer" onclick="event.stopPropagation()">
+    <div class="toc-header">📖 內容目錄</div>
+    <ul class="toc-list" id="tocList"></ul>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="hero-badge">Beginner Guide 2026</div>
+  <h1>GitHub Pages 與 <span>Cloudflare Pages</span><br>差在哪裡？</h1>
+  <p class="hero-sub">給第一次做公開網站、正在學 Vibe Coding 的你。這頁會用簡單中文講清楚兩者差別，也順便帶你搞懂 <strong>CI/CD</strong> 為什麼會讓做網站變得輕鬆很多。</p>
+
+  <div class="hero-quick">
+    <article class="quick-card">
+      <span class="tag tag-blue">最簡單上線</span>
+      <h3>GitHub Pages</h3>
+      <p>適合純 HTML、作品集、筆記、說明頁。設定簡單，跟 GitHub repo 很貼近。</p>
+    </article>
+    <article class="quick-card">
+      <span class="tag tag-orange">更完整的部署流程</span>
+      <h3>Cloudflare Pages</h3>
+      <p>適合想要自動部署、預覽連結、全球 CDN、甚至未來加一點後端功能的人。</p>
+    </article>
+    <article class="quick-card">
+      <span class="tag tag-green">一句話結論</span>
+      <h3>不是誰比較高級</h3>
+      <p>而是你現在要的是「快速公開」還是「好迭代、好擴充、好協作」。</p>
+    </article>
+  </div>
+</header>
+
+<div class="sep">· · ·</div>
+
+<section class="chapter" id="ch1" data-ch="01" data-title="先講人話，兩者到底是什麼？">
+  <div class="chapter-num">Chapter 01</div>
+  <h2>先講人話，兩者到底是什麼？</h2>
+
+  <p><strong>GitHub Pages</strong> 可以把你的靜態網站直接放到網路上。只要 repo 裡有 <code>index.html</code>，設定好 Pages，就能變成公開網址。</p>
+
+  <p><strong>Cloudflare Pages</strong> 也能做同樣的事，但它更像一條完整的網站發佈流水線。你只要把修改 push 到 GitHub，它就能自動建置、產生預覽網址、再部署到正式站。</p>
+
+  <div class="callout">
+    <p><strong>簡單比喻：</strong><br>GitHub Pages 比較像「把做好的海報貼到牆上」。<br>Cloudflare Pages 比較像「有一條會自動印刷、校稿、預覽、上牆的產線」。</p>
+  </div>
+
+  <div class="compare-grid">
+    <article class="compare-card">
+      <span class="tag tag-blue">GitHub Pages</span>
+      <h4>強項是簡單</h4>
+      <p>如果你只是想把一頁作品集、學習筆記、活動介紹頁放上網，它很快就能完成任務。</p>
+    </article>
+    <article class="compare-card">
+      <span class="tag tag-orange">Cloudflare Pages</span>
+      <h4>強項是流程</h4>
+      <p>如果你會持續修改、想有預覽站、希望部署自動化，它通常比較順手。</p>
+    </article>
+  </div>
+</section>
+
+<div class="sep">· · ·</div>
+
+<section class="chapter" id="ch2" data-ch="02" data-title="CI/CD 到底是什麼？">
+  <div class="chapter-num">Chapter 02</div>
+  <h2>CI/CD 到底是什麼？</h2>
+
+  <p>很多人第一次看到 <strong>CI/CD</strong> 會覺得很工程師，但其實它的核心概念很生活化：</p>
+
+  <div class="flow">
+    <div class="flow-step">你改檔案</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">Push 到 Git</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">系統自動建置</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">自動上線</div>
+  </div>
+
+  <p><strong>CI</strong> 可以理解成「每次你更新東西，系統都自動幫你檢查和組裝一次」。<br><strong>CD</strong> 可以理解成「檢查沒問題後，系統自動幫你發佈」。</p>
+
+  <div class="callout callout-blue">
+    <p><strong>用新手能懂的說法：</strong>CI/CD 就是「不用每次手動上傳檔案」，而是改完內容後，平台自己幫你把網站更新好。</p>
+  </div>
+
+  <h3>那 GitHub Pages 沒有 CI/CD 嗎？</h3>
+  <p>不是。GitHub Pages <strong>也可以有</strong>，尤其搭配 GitHub Actions 時一樣能做到自動部署。只是它的預設體驗比較偏向「把靜態頁面放上去」，而不是把預覽、分支部署、環境設定這些都做得很完整。</p>
+
+  <h3>為什麼這對 Vibe Coding 很重要？</h3>
+  <p>因為你很可能會一直改。今天改標題、明天換配色、後天把 AI 幫你產的版面再調一下。有 CI/CD，你每次 push 都能立刻看到新版本，不用反覆手動上傳。</p>
+</section>
+
+<div class="sep">· · ·</div>
+
+<section class="chapter" id="ch3" data-ch="03" data-title="GitHub Pages 適合什麼情境？">
+  <div class="chapter-num">Chapter 03</div>
+  <h2>GitHub Pages 適合什麼情境？</h2>
+
+  <p>如果你現在的網站是 <strong>單頁 HTML、簡單 CSS、少量 JavaScript</strong>，那 GitHub Pages 其實很好用，而且很夠用。</p>
+
+  <div class="feature-grid">
+    <article class="feature-card">
+      <h4>上手快</h4>
+      <p>你已經有 GitHub repo 的話，幾乎不用多學一套新東西。</p>
+    </article>
+    <article class="feature-card">
+      <h4>適合靜態內容</h4>
+      <p>作品集、課程介紹、教學筆記、活動頁、產品 landing page 都很適合。</p>
+    </article>
+    <article class="feature-card">
+      <h4>公開專案很自然</h4>
+      <p>網站內容和原始碼就在同一個公開 repo，分享與維護都方便。</p>
+    </article>
+  </div>
+
+  <h3>它的限制通常出現在這裡</h3>
+  <ul>
+    <li>你想要 <strong>每個 branch 都有預覽網址</strong>，GitHub Pages 預設沒有那麼直覺。</li>
+    <li>你想加一點後端邏輯，例如表單處理、API、身份驗證，GitHub Pages 就比較不是它的主場。</li>
+    <li>如果你之後常常改站、常常 review 版面，流程感會比較弱。</li>
+  </ul>
+
+  <div class="callout callout-green">
+    <p><strong>一句判斷：</strong>如果你只想「把一個完成版的靜態頁面放上網」，GitHub Pages 是很合理的選擇。</p>
+  </div>
+</section>
+
+<div class="sep">· · ·</div>
+
+<section class="chapter" id="ch4" data-ch="04" data-title="Cloudflare Pages 多了哪些好用功能？">
+  <div class="chapter-num">Chapter 04</div>
+  <h2>Cloudflare Pages 多了哪些好用功能？</h2>
+
+  <p>Cloudflare Pages 比較像是「從簡單靜態頁出發，但保留你未來升級的空間」。</p>
+
+  <div class="feature-grid">
+    <article class="feature-card">
+      <span class="mini-label">01</span>
+      <h4>Git 連動自動部署</h4>
+      <p>你只要 push 到 GitHub，它就能自動重新建站，不用手動上傳檔案。</p>
+    </article>
+    <article class="feature-card">
+      <span class="mini-label">02</span>
+      <h4>Preview 預覽連結</h4>
+      <p>每個 branch 或 PR 都能有一個預覽網址，很適合先給妹妹或朋友看再決定要不要正式上線。</p>
+    </article>
+    <article class="feature-card">
+      <span class="mini-label">03</span>
+      <h4>全球 CDN 與 SSL</h4>
+      <p>Cloudflare 本來就很強在全球加速與 HTTPS，網站在世界各地通常都能很快打開。</p>
+    </article>
+    <article class="feature-card">
+      <span class="mini-label">04</span>
+      <h4>自訂網域更順</h4>
+      <p>如果你本來就用 Cloudflare 管 DNS，接自訂網域會很直覺。</p>
+    </article>
+    <article class="feature-card">
+      <span class="mini-label">05</span>
+      <h4>環境變數與建置設定</h4>
+      <p>未來如果你不只是一個 HTML，而是有 React、Astro、Next.js 之類的前端框架，就比較容易長大。</p>
+    </article>
+    <article class="feature-card">
+      <span class="mini-label">06</span>
+      <h4>可延伸到 Functions</h4>
+      <p>如果哪天你想加表單、簡單 API、驗證邏輯，Cloudflare 這條路比較自然。</p>
+    </article>
+  </div>
+
+  <div class="callout">
+    <p><strong>對非工程師最有感的一點通常是：</strong><br>Cloudflare Pages 會讓「改一點點內容 → 立刻拿到一個可分享的預覽網址」這件事變得很舒服。</p>
+  </div>
+</section>
+
+<div class="sep">· · ·</div>
+
+<section class="chapter" id="ch5" data-ch="05" data-title="GitHub Pages 與 Cloudflare Pages 該怎麼選？">
+  <div class="chapter-num">Chapter 05</div>
+  <h2>GitHub Pages 與 Cloudflare Pages 該怎麼選？</h2>
+
+  <div class="decision-grid">
+    <article class="decision-card">
+      <span class="tag tag-blue">選 GitHub Pages</span>
+      <h4>如果你要的是最短路徑</h4>
+      <ul>
+        <li>只有單頁 HTML 或簡單靜態站</li>
+        <li>你想今天就上線</li>
+        <li>網站更新頻率不高</li>
+        <li>不太需要 preview workflow</li>
+      </ul>
+    </article>
+    <article class="decision-card">
+      <span class="tag tag-orange">選 Cloudflare Pages</span>
+      <h4>如果你要的是更好的迭代流程</h4>
+      <ul>
+        <li>你會持續調整內容與版面</li>
+        <li>你想每次修改都自動部署</li>
+        <li>你想先分享預覽再正式發佈</li>
+        <li>你未來可能加表單、API 或框架</li>
+      </ul>
+    </article>
+  </div>
+
+  <h3>最實際的建議</h3>
+  <p><strong>如果只是這次要做一頁公開說明頁</strong>，GitHub Pages 完全可以先上。<br><strong>如果這頁之後會常改，或你妹想順便學一套比較像現代前端工作流的部署方式</strong>，那就值得直接碰 Cloudflare Pages。</p>
+</section>
+
+<div class="sep">· · ·</div>
+
+<section class="chapter" id="ch6" data-ch="06" data-title="給正在學 Vibe Coding 的人，一個很實用的工作流">
+  <div class="chapter-num">Chapter 06</div>
+  <h2>給正在學 Vibe Coding 的人，一個很實用的工作流</h2>
+
+  <p>如果你妹最近在學 Vibe Coding，其實 Cloudflare Pages 很適合當她的練習場，因為整個回饋循環很短。</p>
+
+  <div class="step-grid">
+    <article class="step-card">
+      <span class="mini-label">Step 1</span>
+      <h4>先叫 AI 生一版網站</h4>
+      <p>像這頁一樣，先做出可以看的單頁版，不追求一次完美。</p>
+    </article>
+    <article class="step-card">
+      <span class="mini-label">Step 2</span>
+      <h4>把修改 commit 到 GitHub</h4>
+      <p>每次改動都留痕跡，這樣比較知道自己改了什麼。</p>
+    </article>
+    <article class="step-card">
+      <span class="mini-label">Step 3</span>
+      <h4>讓平台自動部署</h4>
+      <p>不用再手動上傳檔案，網站會自己更新。</p>
+    </article>
+    <article class="step-card">
+      <span class="mini-label">Step 4</span>
+      <h4>先看預覽，再決定上線</h4>
+      <p>這一步很像在跟 AI 反覆對稿，特別適合設計與內容類網站。</p>
+    </article>
+  </div>
+
+  <div class="callout callout-blue">
+    <p><strong>重點不是「用哪個平台比較潮」</strong>，而是你有沒有建立一個能快速修改、快速看到結果、快速修正的迭代流程。</p>
+  </div>
+</section>
+
+<div class="sep">· · ·</div>
+
+<section class="chapter" id="ch7" data-ch="07" data-title="如果你現在就在 GitHub Pages，上 Cloudflare Pages 難嗎？">
+  <div class="chapter-num">Chapter 07</div>
+  <h2>如果你現在就在 GitHub Pages，上 Cloudflare Pages 難嗎？</h2>
+
+  <p>如果你現在的網站就是這種單頁 HTML，其實通常<strong>不難</strong>。因為靜態網站本來就很容易搬。</p>
+
+  <ol>
+    <li>保留原本的 GitHub repo。</li>
+    <li>在 Cloudflare Pages 連接這個 repo。</li>
+    <li>如果只是純 HTML，通常幾乎不用特別 build 設定。</li>
+    <li>之後每次 push，Cloudflare 就會自動幫你部署。</li>
+  </ol>
+
+  <ul class="note-list">
+    <li><strong>你不一定要二選一。</strong>很多人一開始在 GitHub Pages 練手感，之後想升級流程再接到 Cloudflare Pages。</li>
+    <li><strong>如果你已經在用 Cloudflare 管網域，</strong>接自訂網址通常會更順。</li>
+    <li><strong>如果你的網站永遠都只是小型靜態頁，</strong>留在 GitHub Pages 也完全沒問題。</li>
+  </ul>
+</section>
+
+<div class="sep">· · ·</div>
+
+<section class="chapter" id="ch8" data-ch="08" data-title="最後幫你濃縮成一句建議">
+  <div class="chapter-num">Chapter 08</div>
+  <h2>最後幫你濃縮成一句建議</h2>
+
+  <p><strong>想先快速公開一頁網站，GitHub Pages 就夠了。</strong></p>
+  <p><strong>想順便學現代網站部署流程，Cloudflare Pages 更值得碰。</strong></p>
+
+  <div class="callout callout-green">
+    <p><strong>我自己的建議是：</strong><br>這次這種單頁介紹站，可以先用 GitHub Pages 上線。接著再把同一個 repo 接到 Cloudflare Pages，順便學 preview deploy 和 CI/CD。這樣最容易看懂兩者的差別，也最不抽象。</p>
+  </div>
+
+  <p>對新手來說，最好的學法不是一直看名詞，而是做一個真的能打開的頁面，然後親手體驗：</p>
+  <ul>
+    <li>我改了什麼？</li>
+    <li>我 push 之後發生什麼？</li>
+    <li>網站怎麼自動更新？</li>
+    <li>預覽站和正式站差在哪？</li>
+  </ul>
+
+  <p>搞懂這四件事，CI/CD 就不再只是名詞，而是你真的會用的 workflow。</p>
+</section>
+
+<footer class="footer">
+  <p><strong>GitHub Pages vs Cloudflare Pages</strong></p>
+  <p>單頁版教學頁，風格靈感參考 SDDLearn。</p>
+</footer>
+
+<script>
+function toggleTOC() {
+  document.getElementById('tocOverlay').classList.toggle('open');
+}
+
+const chapters = document.querySelectorAll('.chapter');
+const tocList = document.getElementById('tocList');
+chapters.forEach((ch) => {
+  const li = document.createElement('li');
+  const a = document.createElement('a');
+  a.href = '#' + ch.id;
+  a.innerHTML = `<span class="toc-num">${ch.dataset.ch}</span>${ch.dataset.title}`;
+  a.onclick = () => setTimeout(toggleTOC, 180);
+  li.appendChild(a);
+  tocList.appendChild(li);
+});
+
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const p = h > 0 ? (window.scrollY / h) * 100 : 0;
+  document.getElementById('progress').style.width = p + '%';
+});
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+chapters.forEach((ch) => observer.observe(ch));
+</script>
+</body>
+</html>
