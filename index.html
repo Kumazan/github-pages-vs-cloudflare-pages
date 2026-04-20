@@ -438,8 +438,8 @@ a { color: var(--accent); }
     </article>
     <article class="quick-card">
       <span class="tag tag-green">一句話結論</span>
-      <h3>不是誰比較高級</h3>
-      <p>而是現在要的是「快速公開」還是「好迭代、好擴充、好協作」。</p>
+      <h3>重點在需求差異</h3>
+      <p>差異在於是否需要預覽部署、權限切分、可見對象控制，以及後續擴充。</p>
     </article>
   </div>
 </header>
@@ -467,7 +467,7 @@ a { color: var(--accent); }
     <article class="compare-card">
       <span class="tag tag-orange">Cloudflare Pages</span>
       <h4>強項是流程</h4>
-      <p>如果會持續修改、想有預覽站、希望部署自動化，它通常比較順手。</p>
+      <p>如果會持續修改、需要預覽站、並希望每次 push 後自動部署，這一類需求可以直接放進流程裡。</p>
     </article>
   </div>
 </section>
@@ -497,7 +497,7 @@ a { color: var(--accent); }
   </div>
 
   <h3>那 GitHub Pages 沒有 CI/CD 嗎？</h3>
-  <p>不是。GitHub Pages <strong>也可以有</strong>，尤其搭配 GitHub Actions 時一樣能做到自動部署。只是它的預設體驗比較偏向「把靜態頁面放上去」，而不是把預覽、分支部署、環境設定這些都做得很完整。</p>
+  <p>不是。GitHub Pages <strong>也可以有</strong>，尤其搭配 GitHub Actions 時一樣能做到自動部署。差別在於 GitHub Pages 本身不會為每個 branch 自動建立預覽部署，也不內建 Access policy 這類可見對象控制。</p>
 
   <h3>為什麼這對 Vibe Coding 很重要？</h3>
   <p>因為網站內容很可能會一直改。今天改標題、明天換配色、後天把 AI 產生的版面再調一下。有 CI/CD，每次 push 後都能很快看到新版本，不用反覆手動上傳。</p>
@@ -518,7 +518,7 @@ a { color: var(--accent); }
     </article>
     <article class="feature-card">
       <h4>適合靜態內容</h4>
-      <p>作品集、課程介紹、教學筆記、活動頁、產品 landing page 都很適合。</p>
+      <p>作品集、課程介紹、教學筆記、活動頁、產品 landing page 都是常見用途。</p>
     </article>
     <article class="feature-card">
       <h4>公開專案很自然</h4>
@@ -526,17 +526,17 @@ a { color: var(--accent); }
     </article>
   </div>
 
-  <h3>它的限制通常出現在這裡</h3>
+  <h3>它的差異主要出現在這裡</h3>
   <ul>
-    <li>如果希望 <strong>每個 branch 都有預覽網址</strong>，GitHub Pages 預設沒有那麼直覺。</li>
-    <li>如果想加一點後端邏輯，例如表單處理、API、身份驗證，GitHub Pages 就比較不是它的主場。</li>
-    <li>如果有多人協作，<strong>repo 權限和正式站權限</strong>常常靠得很近，切分起來沒那麼細。</li>
-    <li>如果還想進一步控制<strong>誰看得到網站</strong>，GitHub Pages 也不是特別強在這一塊，通常會需要額外做法。</li>
-    <li>如果之後常常改站、常常 review 版面，流程感會比較弱。</li>
+    <li>GitHub Pages 不會為每個 branch 或 PR 自動提供獨立的預覽網址。</li>
+    <li>GitHub Pages 主要提供靜態網站託管。表單處理、API、身份驗證通常要另外搭配其他服務。</li>
+    <li>如果有多人協作，能 push 到發佈分支的人，就能更新正式站，repo 寫入權限和正式站更新會直接連在一起。</li>
+    <li>如果要限制<strong>誰看得到網站</strong>，通常要再搭配其他機制，GitHub Pages 本身不提供 Cloudflare Access 這類 policy。</li>
+    <li>如果每次修改都要先 review，再決定是否上線，通常要另外安排測試站、分支流程或其他工具。</li>
   </ul>
 
   <div class="callout callout-green">
-    <p><strong>一句判斷：</strong>如果只想「把一個完成版的靜態頁面放上網」，GitHub Pages 是很合理的選擇。</p>
+    <p><strong>一句判斷：</strong>如果需求是把完成版靜態頁面直接公開，GitHub Pages 就能完成這件事。</p>
   </div>
 </section>
 
@@ -546,7 +546,7 @@ a { color: var(--accent); }
   <div class="chapter-num">Chapter 04</div>
   <h2>Cloudflare Pages 多了哪些好用功能？</h2>
 
-  <p>Cloudflare Pages 比較像是「從簡單靜態頁出發，但保留未來升級的空間」。</p>
+  <p>Cloudflare Pages 提供從 Git 觸發的建置與部署流程，並把預覽部署、正式部署、網域設定與後續擴充放在同一套系統裡。</p>
 
   <div class="feature-grid">
     <article class="feature-card">
@@ -557,32 +557,32 @@ a { color: var(--accent); }
     <article class="feature-card">
       <span class="mini-label">02</span>
       <h4>Preview 預覽連結</h4>
-      <p>每個 branch 或 PR 都能有一個預覽網址，很適合先分享草稿版本，再決定要不要正式上線。</p>
+      <p>每個 branch 或 PR 都能有一個預覽網址，可以先分享草稿版本，再決定是否上正式站。</p>
     </article>
     <article class="feature-card">
       <span class="mini-label">03</span>
       <h4>全球 CDN 與 SSL</h4>
-      <p>Cloudflare 本來就很強在全球加速與 HTTPS，網站在世界各地通常都能很快打開。</p>
+      <p>Cloudflare 會把內容放到其 CDN，並預設提供 HTTPS，公開站點會透過同一套網路邊緣節點送出內容。</p>
     </article>
     <article class="feature-card">
       <span class="mini-label">04</span>
-      <h4>自訂網域更順</h4>
-      <p>如果本來就用 Cloudflare 管 DNS，接自訂網域會很直覺。</p>
+      <h4>自訂網域與 DNS 可一起管理</h4>
+      <p>如果網域本來就在 Cloudflare，可在同一個平台處理 DNS、憑證、Pages 與 Access 設定。</p>
     </article>
     <article class="feature-card">
       <span class="mini-label">05</span>
-      <h4>可見對象與權限 policy 比較完整</h4>
-      <p>除了誰能改、誰能部署，也可以透過 Access policy 管理誰能看到 preview。若有需要，還能進一步把 pages.dev 或 custom domain 放到 Cloudflare Access 後面保護。</p>
+      <h4>可用 policy 控制可見對象</h4>
+      <p>除了誰能改、誰能部署，也可以透過 Access policy 管理誰能看到 preview。若有需要，還能把 pages.dev 或 custom domain 放到 Cloudflare Access 後面。</p>
     </article>
     <article class="feature-card">
       <span class="mini-label">06</span>
       <h4>可延伸到 Functions</h4>
-      <p>如果哪天想加表單、簡單 API、驗證邏輯，Cloudflare 這條路比較自然。</p>
+      <p>如果要加表單、簡單 API、驗證邏輯，可以直接往 Pages Functions 延伸。</p>
     </article>
   </div>
 
   <div class="callout">
-    <p><strong>對非工程師最有感的一點通常是：</strong><br>Cloudflare Pages 不只讓「改一點點內容 → 立刻拿到預覽網址」變得舒服，也更容易把預覽、正式站、設定權限，甚至可見對象分開管理。</p>
+    <p><strong>這裡的差異可以直接拆成兩件事：</strong><br>一是 Cloudflare Pages 會自動提供預覽部署，二是可透過 policy 決定誰能看到 preview 或受保護的站點。</p>
   </div>
 </section>
 
@@ -595,30 +595,30 @@ a { color: var(--accent); }
   <div class="decision-grid">
     <article class="decision-card">
       <span class="tag tag-blue">選 GitHub Pages</span>
-      <h4>如果目標是最短路徑</h4>
+      <h4>適合這些情況</h4>
       <ul>
         <li>只有單頁 HTML 或簡單靜態站</li>
-        <li>想今天就上線</li>
+        <li>要先把網站公開上線</li>
         <li>網站更新頻率不高</li>
-        <li>不太需要 preview workflow</li>
-        <li>協作人數少，權限與可見範圍不用切太細</li>
+        <li>不需要 branch / PR 預覽網址</li>
+        <li>協作人數少，正式站更新權限不需要另外拆分</li>
       </ul>
     </article>
     <article class="decision-card">
       <span class="tag tag-orange">選 Cloudflare Pages</span>
-      <h4>如果目標是更好的迭代流程</h4>
+      <h4>適合這些情況</h4>
       <ul>
         <li>會持續調整內容與版面</li>
-        <li>想每次修改都自動部署</li>
-        <li>想先分享預覽再正式發佈</li>
+        <li>每次修改都要自動部署</li>
+        <li>要先分享預覽，再決定是否上正式站</li>
         <li>未來可能加表單、API 或框架</li>
-        <li>開始在意 preview、production、設定權限與可見對象的切分</li>
+        <li>需要區分 preview、production、設定權限與可見對象</li>
       </ul>
     </article>
   </div>
 
   <h3>最實際的建議</h3>
-  <p><strong>如果只是這次要做一頁公開說明頁</strong>，GitHub Pages 完全可以先上。<br><strong>如果這頁之後會常改，或想順便學一套比較像現代前端工作流的部署方式</strong>，那就值得直接碰 Cloudflare Pages，尤其是在開始在意 preview、production、權限管理，以及誰能看到網站之後。</p>
+  <p><strong>如果只是這次要做一頁公開說明頁</strong>，GitHub Pages 可以直接使用。<br><strong>如果這頁之後會常改，或要把預覽部署、policy 與可見對象管理一起納入流程</strong>，Cloudflare Pages 會多出這幾個機制。</p>
 </section>
 
 <div class="sep">· · ·</div>
@@ -627,7 +627,7 @@ a { color: var(--accent); }
   <div class="chapter-num">Chapter 06</div>
   <h2>給正在學 Vibe Coding 的人，一個很實用的工作流</h2>
 
-  <p>對最近在學 Vibe Coding 的初學者來說，Cloudflare Pages 很適合當練習場，因為整個回饋循環很短。</p>
+  <p>對最近在學 Vibe Coding 的初學者來說，Cloudflare Pages 可以直接練習「修改、push、預覽、部署」這一整段流程。</p>
 
   <div class="step-grid">
     <article class="step-card">
@@ -638,7 +638,7 @@ a { color: var(--accent); }
     <article class="step-card">
       <span class="mini-label">Step 2</span>
       <h4>把修改 commit 到 GitHub</h4>
-      <p>每次改動都留痕跡，這樣比較知道自己改了什麼。</p>
+      <p>每次改動都留痕跡，方便對照每次修改的內容。</p>
     </article>
     <article class="step-card">
       <span class="mini-label">Step 3</span>
@@ -653,7 +653,7 @@ a { color: var(--accent); }
   </div>
 
   <div class="callout callout-blue">
-    <p><strong>重點不是「用哪個平台比較潮」</strong>，而是有沒有建立一個能快速修改、快速看到結果、快速修正的迭代流程。</p>
+    <p><strong>重點不是平台名稱本身</strong>，而是是否建立了「修改、預覽、確認、部署」這條迭代流程。</p>
   </div>
 </section>
 
@@ -686,10 +686,10 @@ a { color: var(--accent); }
   <h2>最後濃縮成一句建議</h2>
 
   <p><strong>想先快速公開一頁網站，GitHub Pages 就夠了。</strong></p>
-  <p><strong>想順便學現代網站部署流程，Cloudflare Pages 更值得碰。</strong></p>
+  <p><strong>想同時學預覽部署、policy 與可見對象控制，Cloudflare Pages 會多出這些內容。</strong></p>
 
   <div class="callout callout-green">
-    <p><strong>比較務實的建議是：</strong><br>這次這種單頁介紹站，可以先用 GitHub Pages 上線。接著再把同一個 repo 接到 Cloudflare Pages，順便學 preview deploy 和 CI/CD。這樣最容易看懂兩者的差別，也最不抽象。</p>
+    <p><strong>實作順序可以這樣安排：</strong><br>先用 GitHub Pages 上線這份單頁介紹站，再把同一個 repo 接到 Cloudflare Pages，對照 preview deploy、CI/CD、policy 與可見對象控制。</p>
   </div>
 
   <p>對新手來說，最好的學法不是一直看名詞，而是做一個真的能打開的頁面，然後親手體驗：</p>
