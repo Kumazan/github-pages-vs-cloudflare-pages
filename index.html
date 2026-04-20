@@ -530,6 +530,7 @@ a { color: var(--accent); }
   <ul>
     <li>如果希望 <strong>每個 branch 都有預覽網址</strong>，GitHub Pages 預設沒有那麼直覺。</li>
     <li>如果想加一點後端邏輯，例如表單處理、API、身份驗證，GitHub Pages 就比較不是它的主場。</li>
+    <li>如果有多人協作，<strong>repo 權限和正式站權限</strong>常常靠得很近，切分起來沒那麼細。</li>
     <li>如果之後常常改站、常常 review 版面，流程感會比較弱。</li>
   </ul>
 
@@ -555,7 +556,7 @@ a { color: var(--accent); }
     <article class="feature-card">
       <span class="mini-label">02</span>
       <h4>Preview 預覽連結</h4>
-      <p>每個 branch 或 PR 都能有一個預覽網址，很適合先給妹妹或朋友看再決定要不要正式上線。</p>
+      <p>每個 branch 或 PR 都能有一個預覽網址，很適合先分享草稿版本，再決定要不要正式上線。</p>
     </article>
     <article class="feature-card">
       <span class="mini-label">03</span>
@@ -569,8 +570,8 @@ a { color: var(--accent); }
     </article>
     <article class="feature-card">
       <span class="mini-label">05</span>
-      <h4>環境變數與建置設定</h4>
-      <p>未來如果不只是一個 HTML，而是有 React、Astro、Next.js 之類的前端框架，就比較容易長大。</p>
+      <h4>權限與設定比較容易拆分</h4>
+      <p>Preview、production、網域、環境變數這些通常比較容易分開管理，協作時更好控制誰能看、誰能改、誰能上線。</p>
     </article>
     <article class="feature-card">
       <span class="mini-label">06</span>
@@ -580,7 +581,7 @@ a { color: var(--accent); }
   </div>
 
   <div class="callout">
-    <p><strong>對非工程師最有感的一點通常是：</strong><br>Cloudflare Pages 會讓「改一點點內容 → 立刻拿到一個可分享的預覽網址」這件事變得很舒服。</p>
+    <p><strong>對非工程師最有感的一點通常是：</strong><br>Cloudflare Pages 不只讓「改一點點內容 → 立刻拿到預覽網址」變得舒服，也更容易把預覽、正式站和設定權限分開管理。</p>
   </div>
 </section>
 
@@ -599,6 +600,7 @@ a { color: var(--accent); }
         <li>想今天就上線</li>
         <li>網站更新頻率不高</li>
         <li>不太需要 preview workflow</li>
+        <li>協作人數少，權限不用切太細</li>
       </ul>
     </article>
     <article class="decision-card">
@@ -609,31 +611,10 @@ a { color: var(--accent); }
         <li>想每次修改都自動部署</li>
         <li>想先分享預覽再正式發佈</li>
         <li>未來可能加表單、API 或框架</li>
+        <li>開始在意 preview、production 與設定權限的切分</li>
       </ul>
     </article>
   </div>
-
-  <h3>還有一個很實際的差異：權限管理</h3>
-  <p>對很多人來說，真正關鍵的不只是部署快不快，而是 <strong>誰能改正式站、誰只能先看預覽、誰能碰設定和網域</strong>。</p>
-
-  <div class="compare-grid">
-    <article class="compare-card">
-      <span class="tag tag-blue">GitHub Pages</span>
-      <h4>權限通常跟 repo 綁得比較緊</h4>
-      <p>誰能 push 到發佈分支，誰通常就能直接影響正式站。也就是說，<strong>程式碼權限</strong>和<strong>上線權限</strong>常常是綁在一起的。</p>
-    </article>
-    <article class="compare-card">
-      <span class="tag tag-orange">Cloudflare Pages</span>
-      <h4>比較容易把看預覽、改設定、正式部署拆開</h4>
-      <p>如果 repo 連到 Cloudflare Pages，能 push 到 production branch 的人一樣會影響正式站，但它多了 <strong>preview 連結、專案設定、網域與環境變數</strong> 這些管理層，協作時比較容易切清楚。</p>
-    </article>
-  </div>
-
-  <ul class="note-list">
-    <li><strong>GitHub Pages 比較像：</strong>能改 repo 的人，多半也就是能動到網站的人。</li>
-    <li><strong>Cloudflare Pages 比較像：</strong>可以先把 preview 網址給別人看，不一定要先給對方 repo 寫入權限或 production 權限。</li>
-    <li><strong>如果未來會碰 API key、表單、環境變數，</strong>Cloudflare Pages 通常也更適合做權限切分。</li>
-  </ul>
 
   <h3>最實際的建議</h3>
   <p><strong>如果只是這次要做一頁公開說明頁</strong>，GitHub Pages 完全可以先上。<br><strong>如果這頁之後會常改，或想順便學一套比較像現代前端工作流的部署方式</strong>，那就值得直接碰 Cloudflare Pages，尤其是在開始在意 preview、production 與權限管理之後。</p>
@@ -719,7 +700,7 @@ a { color: var(--accent); }
     <li>誰有權限影響正式站？</li>
   </ul>
 
-  <p>搞懂這四件事，CI/CD 就不再只是名詞，而是實際會用到的 workflow。</p>
+  <p>搞懂這幾件事，CI/CD 就不再只是名詞，而是實際會用到的 workflow。</p>
 </section>
 
 <footer class="footer">
